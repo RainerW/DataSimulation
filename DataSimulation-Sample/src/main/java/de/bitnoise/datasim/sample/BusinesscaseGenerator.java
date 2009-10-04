@@ -1,7 +1,61 @@
 package de.bitnoise.datasim.sample;
 
+import java.util.Date;
+import java.util.Random;
+
+import de.bitnoise.datasim.SimulatorController;
+import de.bitnoise.datasim.input.SimulatorEvent;
 import de.bitnoise.datasim.input.SimulatorInput;
 
 public class BusinesscaseGenerator implements SimulatorInput {
+
+	Random rnd = new Random();
+	int id = 0;
+
+	private SimulatorController fController;
+
+	public String getPlugName() {
+		return getClass().getName();
+	}
+
+	public long getPlugVersion() {
+		return 0;
+	}
+
+	public void registerSimulatorController(SimulatorController controller) {
+		fController = controller;
+	}
+
+	public void createNextEvent(SimulatorController controller, Date now) {
+		if (rnd.nextBoolean()) {
+			System.out.println("Create Event : " + id);
+			
+			Businesscase bc = new Businesscase();
+			controller.addModel( bc );
+			
+			{
+				Date time = new Date(now.getTime() + 10);
+				BusinesscaseEvent eventToExceut = new BusinesscaseEvent(bc,time);
+				controller.addEvent(eventToExceut);
+				bc.addEvent("Message 1 ",eventToExceut);
+			}
+
+			{
+				Date time = new Date(now.getTime() + 1280);
+				BusinesscaseEvent eventToExceut = new BusinesscaseEvent(bc,time);
+				controller.addEvent(eventToExceut);
+				bc.addEvent("Message 2 :",eventToExceut);
+			}
+		}
+	}
+
+	public void simulationPause(boolean pause) {
+	}
+
+	public void simulationStart() {
+	}
+
+	public void simulationStop() {
+	}
 
 }
