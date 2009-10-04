@@ -3,6 +3,8 @@ package de.bitnoise.datasim;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.Date;
+import java.util.EnumMap;
+import java.util.EnumSet;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
@@ -15,10 +17,11 @@ import de.bitnoise.datasim.model.ModelState;
 import de.bitnoise.datasim.model.SimulatorModel;
 import de.bitnoise.datasim.ui.SimulatorEventDetailListener;
 import de.bitnoise.datasim.ui.SimulatorEventListener;
+import de.bitnoise.datasim.ui.SimulatorModelListener;
 import de.bitnoise.datasim.writer.SimulatorWriter;
 
 public class DefaultController implements SimulatorControllerProvider,
-		Runnable, SimulatorEventDetailListener {
+		Runnable, SimulatorModelListener, SimulatorEventListener {
 
 	List<SimulatorInput> inputs = new ArrayList<SimulatorInput>();
 
@@ -36,6 +39,15 @@ public class DefaultController implements SimulatorControllerProvider,
 
 	private boolean shutdownRequest = false;
 
+	private EnumMap<ModelState, List<SimulatorModel>> modelsByState = new EnumMap<ModelState, List<SimulatorModel>>(
+			ModelState.class);
+
+	public DefaultController() {
+		for (ModelState state : ModelState.values()) {
+			modelsByState.put(state, new ArrayList<SimulatorModel>());
+		}
+	}
+
 	public boolean addEvent(SimulatorEvent... eventToExecute) {
 		if (eventToExecute == null) {
 			return false;
@@ -46,6 +58,7 @@ public class DefaultController implements SimulatorControllerProvider,
 			} else {
 				events.add(event);
 			}
+			event.addEventListener(this);
 		}
 		return false;
 	}
@@ -214,14 +227,27 @@ public class DefaultController implements SimulatorControllerProvider,
 
 	List<SimulatorEventListener> eventsListeners = new ArrayList<SimulatorEventListener>();
 
-	public void registerModelListener(SimulatorEventListener modelListener) {
+	private List<SimulatorModelListener> modelsListener = new ArrayList<SimulatorModelListener>();
+
+	public void registerEventListener(SimulatorEventListener modelListener) {
 		eventsListeners.add(modelListener);
+	}
+
+	public void registerModelListener(SimulatorModelListener listener) {
+		modelsListener.add(listener);
 	}
 
 	private void notifyEventsChanged() {
 		for (SimulatorEventListener listener : eventsListeners) {
 			listener.eventSimulatorEventChanged();
 		}
+	}
+
+	private void notifyModelsChanged(SimulatorModel changedModel) {
+		for (SimulatorModelListener listener : modelsListener) {
+			listener.eventSimulatorModelChanged(changedModel);
+		}
+
 	}
 
 	public List<SimulatorEvent> getEventsList() {
@@ -233,6 +259,29 @@ public class DefaultController implements SimulatorControllerProvider,
 
 	public void eventSimulatorEventChanged() {
 		notifyEventsChanged();
+	}
+
+	public void eventSimulatorModelChanged(SimulatorModel changedModel) {
+		notifyModelsChanged(changedModel);
+	}
+
+	protected List<SimulatorModel> getModelList() {
+		return models;
+	}
+
+	public List<SimulatorModel> getModelList(ModelState... filter) {
+		if (filter == null || filter.length == 0) {
+			return getModelList();
+		}
+		EnumSet<ModelState> filterSet = EnumSet.of(filter[0], filter);
+		List<SimulatorModel> result = new ArrayList<SimulatorModel>();
+		for (SimulatorModel model : getModelList()) {
+			ModelState state = model.getModelState();
+			if (filterSet.contains(state)) {
+				result.add(model);
+			}
+		}
+		return result;
 	}
 
 }

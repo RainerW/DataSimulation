@@ -2,14 +2,9 @@ package de.bitnoise.datasim.gui.adapter;
 
 import java.text.SimpleDateFormat;
 import java.util.Date;
-import java.util.Enumeration;
 import java.util.List;
 
-import javax.swing.ListSelectionModel;
-import javax.swing.event.TableColumnModelListener;
-import javax.swing.table.DefaultTableColumnModel;
 import javax.swing.table.DefaultTableModel;
-import javax.swing.table.TableColumn;
 import javax.swing.table.TableColumnModel;
 
 import de.bitnoise.datasim.SimulatorControllerProvider;
@@ -24,7 +19,7 @@ public class EventTable extends DefaultTableModel implements
 
 	public EventTable(SimulatorControllerProvider controller) {
 		myController = controller;
-		myController.registerModelListener(this);
+		myController.registerEventListener(this);
 	}
 
 	@Override
@@ -32,25 +27,26 @@ public class EventTable extends DefaultTableModel implements
 		return 4;
 	}
 
-	public void setTableWidth(TableColumnModel tableColumnModel) {
-		tableColumnModel.getColumn(0).setMaxWidth(60);
-		tableColumnModel.getColumn(1).setMaxWidth(160);
-		tableColumnModel.getColumn(1).setPreferredWidth(160);
-		tableColumnModel.getColumn(2).setMaxWidth(80);
-		tableColumnModel.getColumn(2).setPreferredWidth(80);
-		tableColumnModel.getColumn(2).setPreferredWidth(100);
-		tableColumnModel.getColumn(3).setPreferredWidth(10);
+	public void setTableWidth(TableColumnModel columnModel) {
+		columnModel.getColumn(0).setMaxWidth(160);
+		columnModel.getColumn(0).setPreferredWidth(160);
+		columnModel.getColumn(1).setMaxWidth(150);
+		columnModel.getColumn(1).setPreferredWidth(150);
+		columnModel.getColumn(2).setMaxWidth(80);
+		columnModel.getColumn(2).setPreferredWidth(80);
+		columnModel.getColumn(2).setPreferredWidth(100);
+		columnModel.getColumn(3).setPreferredWidth(10);
 	}
 
 	@Override
 	public String getColumnName(int column) {
 		switch (column) {
 		case 0:
-			return "Type";
-		case 1:
 			return "Time";
+		case 1:
+			return "Type";
 		case 2:
-			return "Tracking ID";
+			return "Model ID";
 		case 3:
 			return "Details";
 		default:
@@ -70,14 +66,14 @@ public class EventTable extends DefaultTableModel implements
 		SimulatorEvent event = events.get(row);
 		switch (column) {
 		case 0:
-			return event.getOutputWriterType();
-		case 1:
 			if (event instanceof SimulatorTimedEvent) {
 				Date time = ((SimulatorTimedEvent) event).getOccuranceTime();
 				return asTime(time);
 			} else {
 				return "imediatly";
 			}
+		case 1:
+			return event.getType();
 		case 2:
 			return event.getTrackingModel().getUniqeID();
 		case 3:

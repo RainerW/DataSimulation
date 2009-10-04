@@ -1,11 +1,15 @@
 package de.bitnoise.datasim;
 
 import java.util.Date;
+import java.util.EnumSet;
 import java.util.List;
 
 import de.bitnoise.datasim.input.SimulatorEvent;
 import de.bitnoise.datasim.input.SimulatorInput;
+import de.bitnoise.datasim.model.ModelState;
+import de.bitnoise.datasim.model.SimulatorModel;
 import de.bitnoise.datasim.ui.SimulatorEventListener;
+import de.bitnoise.datasim.ui.SimulatorModelListener;
 import de.bitnoise.datasim.writer.SimulatorWriter;
 
 public interface SimulatorControllerProvider extends SimulatorController {
@@ -29,9 +33,13 @@ public interface SimulatorControllerProvider extends SimulatorController {
 	void start();
 
 	boolean isRunning();
-	
-	void registerModelListener(SimulatorEventListener modelListener);
+
+	void registerEventListener(SimulatorEventListener modelListener);
+
+	void registerModelListener(SimulatorModelListener modelListener);
 
 	List<SimulatorEvent> getEventsList();
-	
+
+	List<SimulatorModel> getModelList(ModelState...filter);
+
 }

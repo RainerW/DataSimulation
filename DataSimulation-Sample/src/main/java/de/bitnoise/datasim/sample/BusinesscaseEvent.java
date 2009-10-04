@@ -2,26 +2,25 @@ package de.bitnoise.datasim.sample;
 
 import java.util.Date;
 
+import de.bitnoise.datasim.input.DefaultEvent;
 import de.bitnoise.datasim.input.SimulatorTimedEvent;
 import de.bitnoise.datasim.model.SimulatorModel;
+import de.bitnoise.datasim.ui.SimulatorEventListener;
 import de.bitnoise.datasim.writer.SimulatorWriter;
 
-public class BusinesscaseEvent implements SimulatorTimedEvent {
+public class BusinesscaseEvent extends DefaultEvent implements
+		SimulatorTimedEvent {
 
 	private Date fTime;
 
 	private Businesscase myBC;
 
-	private String fDetails = "";
-
 	protected static int uniqueID = 1;
 
 	public BusinesscaseEvent(Businesscase bc, Date executionTime, String details) {
+		super(bc, details);
 		fTime = executionTime;
 		myBC = bc;
-		if (details != null) {
-			fDetails = details;
-		}
 	}
 
 	public Class<?> getOutputWriterType() {
@@ -41,12 +40,8 @@ public class BusinesscaseEvent implements SimulatorTimedEvent {
 		return true;
 	}
 
-	public SimulatorModel getTrackingModel() {
-		return myBC;
-	}
-
-	public String getDetails() {
-		return "New Notification ( " + fDetails + ") ID = " + uniqueID;
+	public String getType() {
+		return "DB-Notification";
 	}
 
 }

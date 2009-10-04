@@ -5,6 +5,7 @@ import java.util.List;
 
 import de.bitnoise.datasim.UniqeID;
 import de.bitnoise.datasim.ui.SimulatorEventDetailListener;
+import de.bitnoise.datasim.ui.SimulatorModelListener;
 
 public class BaseSimulatorModel implements SimulatorModel {
 
@@ -12,7 +13,9 @@ public class BaseSimulatorModel implements SimulatorModel {
 
 	private String uniqueID = UniqeID.generateAsString();
 
-	private List<SimulatorEventDetailListener> modelListener = new ArrayList<SimulatorEventDetailListener>();
+	private List<SimulatorModelListener> modelListener = new ArrayList<SimulatorModelListener>();
+
+	private String fDetail = "";
 
 	protected void setModelState(ModelState newState) {
 		fCurrentState = newState;
@@ -26,14 +29,26 @@ public class BaseSimulatorModel implements SimulatorModel {
 		return uniqueID;
 	}
 
-	public void addModelListener(SimulatorEventDetailListener listener) {
-		modelListener.add(listener);
+	public boolean addModelListener(SimulatorModelListener listener) {
+		return modelListener.add(listener);
 	}
 
-	protected void notifyModelChange() {
-		for (SimulatorEventDetailListener listener : modelListener) {
-			listener.eventSimulatorEventChanged();
+	protected void notifyModelChange(SimulatorModel changedModel) {
+		for (SimulatorModelListener listener : modelListener) {
+			listener.eventSimulatorModelChanged(changedModel);
 		}
+	}
+
+	protected void setDetails(String detail) {
+		fDetail = detail;
+	}
+
+	public String getDetails() {
+		return fDetail;
+	}
+
+	public boolean removeListener(SimulatorModelListener listener) {
+		return modelListener.remove(listener);
 	}
 
 }
