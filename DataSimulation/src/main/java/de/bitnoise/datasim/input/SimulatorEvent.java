@@ -1,5 +1,6 @@
 package de.bitnoise.datasim.input;
 
+import de.bitnoise.datasim.model.SimulatorModel;
 import de.bitnoise.datasim.writer.SimulatorWriter;
 
 public interface SimulatorEvent {
@@ -8,4 +9,8 @@ public interface SimulatorEvent {
 	Object getPayload();
 	
 	boolean writeTo(SimulatorWriter writer);
+
+	SimulatorModel getTrackingModel();
+	
+	String getDetails();
 }

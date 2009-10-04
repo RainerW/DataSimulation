@@ -35,14 +35,14 @@ public class BusinesscaseGenerator implements SimulatorInput {
 			
 			{
 				Date time = new Date(now.getTime() + 10);
-				BusinesscaseEvent eventToExceut = new BusinesscaseEvent(bc,time);
+				BusinesscaseEvent eventToExceut = new BusinesscaseEvent(bc,time,"Activation 1/2");
 				controller.addEvent(eventToExceut);
 				bc.addEvent("Message 1 ",eventToExceut);
 			}
 
 			{
-				Date time = new Date(now.getTime() + 1280);
-				BusinesscaseEvent eventToExceut = new BusinesscaseEvent(bc,time);
+				Date time = new Date(now.getTime() + rnd.nextInt(5000));
+				BusinesscaseEvent eventToExceut = new BusinesscaseEvent(bc,time,"Activation 2/2");
 				controller.addEvent(eventToExceut);
 				bc.addEvent("Message 2 :",eventToExceut);
 			}

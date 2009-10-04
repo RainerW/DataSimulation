@@ -17,6 +17,6 @@ public class ApplicationMain
     
     sim.registerWriter( new DatabaseWriter());
     
-    sim.runSimulation();
+    sim.runSimulation(true);
   }
 }

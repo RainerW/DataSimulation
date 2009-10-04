@@ -7,6 +7,7 @@ import de.bitnoise.datasim.input.SimulatorEvent;
 import de.bitnoise.datasim.model.BaseSimulatorModel;
 import de.bitnoise.datasim.model.ModelState;
 import de.bitnoise.datasim.model.SimulatorModel;
+import de.bitnoise.datasim.ui.SimulatorEventDetailListener;
 
 public class Businesscase extends BaseSimulatorModel implements SimulatorModel {
 
