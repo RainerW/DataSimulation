@@ -3,11 +3,12 @@ package de.bitnoise.datasim.sample;
 import java.util.Date;
 import java.util.Random;
 
-import de.bitnoise.datasim.SimulatorController;
-import de.bitnoise.datasim.input.SimulatorEvent;
-import de.bitnoise.datasim.input.SimulatorInput;
+import de.bitnoise.datasim.controller.SimulatorController;
+import de.bitnoise.datasim.events.SimulatorEvent;
+import de.bitnoise.datasim.generator.AbstractSimulatorInput;
+import de.bitnoise.datasim.generator.SimulatorInput;
 
-public class BusinesscaseGenerator implements SimulatorInput {
+public class BusinesscaseGenerator extends AbstractSimulatorInput implements SimulatorInput {
 
 	Random rnd = new Random();
 	int id = 0;

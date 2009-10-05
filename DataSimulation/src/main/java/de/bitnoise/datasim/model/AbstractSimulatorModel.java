@@ -3,15 +3,15 @@ package de.bitnoise.datasim.model;
 import java.util.ArrayList;
 import java.util.List;
 
-import de.bitnoise.datasim.UniqeID;
 import de.bitnoise.datasim.ui.SimulatorEventDetailListener;
 import de.bitnoise.datasim.ui.SimulatorModelListener;
+import de.bitnoise.datasim.util.UniqeID;
 
-public class BaseSimulatorModel implements SimulatorModel {
+public class AbstractSimulatorModel implements SimulatorModel {
 
 	protected ModelState fCurrentState = ModelState.UNDEFINED;
 
-	private String uniqueID = UniqeID.generateAsString();
+	private Long uniqueID = UniqeID.generate();
 
 	private List<SimulatorModelListener> modelListener = new ArrayList<SimulatorModelListener>();
 
@@ -25,7 +25,7 @@ public class BaseSimulatorModel implements SimulatorModel {
 		return fCurrentState;
 	}
 
-	public String getUniqeID() {
+	public Long getUniqeID() {
 		return uniqueID;
 	}
 

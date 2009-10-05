@@ -3,13 +3,13 @@ package de.bitnoise.datasim.sample;
 import java.util.HashMap;
 import java.util.Map;
 
-import de.bitnoise.datasim.input.SimulatorEvent;
-import de.bitnoise.datasim.model.BaseSimulatorModel;
+import de.bitnoise.datasim.events.SimulatorEvent;
+import de.bitnoise.datasim.model.AbstractSimulatorModel;
 import de.bitnoise.datasim.model.ModelState;
 import de.bitnoise.datasim.model.SimulatorModel;
 import de.bitnoise.datasim.ui.SimulatorEventDetailListener;
 
-public class Businesscase extends BaseSimulatorModel implements SimulatorModel {
+public class Businesscase extends AbstractSimulatorModel implements SimulatorModel {
 
 	int eventCount = 0;
 	private int top = 0;

@@ -1,4 +1,4 @@
-package de.bitnoise.datasim.input;
+package de.bitnoise.datasim.events;
 
 import de.bitnoise.datasim.model.SimulatorModel;
 import de.bitnoise.datasim.ui.SimulatorEventListener;

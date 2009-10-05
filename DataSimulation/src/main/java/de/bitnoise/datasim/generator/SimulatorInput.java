@@ -1,9 +1,9 @@
-package de.bitnoise.datasim.input;
+package de.bitnoise.datasim.generator;
 
 import java.util.Date;
 
-import de.bitnoise.datasim.SimulatorController;
 import de.bitnoise.datasim.SimulatorPlug;
+import de.bitnoise.datasim.controller.SimulatorController;
 
 public interface SimulatorInput extends SimulatorPlug {
 

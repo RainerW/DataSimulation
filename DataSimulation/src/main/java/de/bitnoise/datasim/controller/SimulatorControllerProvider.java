@@ -1,11 +1,11 @@
-package de.bitnoise.datasim;
+package de.bitnoise.datasim.controller;
 
 import java.util.Date;
 import java.util.EnumSet;
 import java.util.List;
 
-import de.bitnoise.datasim.input.SimulatorEvent;
-import de.bitnoise.datasim.input.SimulatorInput;
+import de.bitnoise.datasim.events.SimulatorEvent;
+import de.bitnoise.datasim.generator.SimulatorInput;
 import de.bitnoise.datasim.model.ModelState;
 import de.bitnoise.datasim.model.SimulatorModel;
 import de.bitnoise.datasim.ui.SimulatorEventListener;

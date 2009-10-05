@@ -1,6 +1,6 @@
 package de.bitnoise.datasim.sample;
 
-import de.bitnoise.datasim.input.SimulatorEvent;
+import de.bitnoise.datasim.events.SimulatorEvent;
 import de.bitnoise.datasim.writer.SimulatorWriter;
 
 public class DatabaseWriter implements SimulatorWriter {

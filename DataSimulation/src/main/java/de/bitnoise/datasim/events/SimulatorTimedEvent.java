@@ -1,4 +1,4 @@
-package de.bitnoise.datasim.input;
+package de.bitnoise.datasim.events;
 
 import java.util.Date;
 

@@ -2,13 +2,13 @@ package de.bitnoise.datasim.sample;
 
 import java.util.Date;
 
-import de.bitnoise.datasim.input.DefaultEvent;
-import de.bitnoise.datasim.input.SimulatorTimedEvent;
+import de.bitnoise.datasim.events.AbstractSimulatorEvent;
+import de.bitnoise.datasim.events.SimulatorTimedEvent;
 import de.bitnoise.datasim.model.SimulatorModel;
 import de.bitnoise.datasim.ui.SimulatorEventListener;
 import de.bitnoise.datasim.writer.SimulatorWriter;
 
-public class BusinesscaseEvent extends DefaultEvent implements
+public class BusinesscaseEvent extends AbstractSimulatorEvent implements
 		SimulatorTimedEvent {
 
 	private Date fTime;

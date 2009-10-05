@@ -1,7 +1,5 @@
-package de.bitnoise.datasim.input;
+package de.bitnoise.datasim.model;
 
-import de.bitnoise.datasim.model.ModelState;
-import de.bitnoise.datasim.model.SimulatorModel;
 import de.bitnoise.datasim.ui.SimulatorModelListener;
 
 public class NoModelDefined implements SimulatorModel {
@@ -14,8 +12,8 @@ public class NoModelDefined implements SimulatorModel {
 		return ModelState.UNDEFINED;
 	}
 
-	public String getUniqeID() {
-		return "-";
+	public Long getUniqeID() {
+		return 0L;
 	}
 
 	public String getDetails() {

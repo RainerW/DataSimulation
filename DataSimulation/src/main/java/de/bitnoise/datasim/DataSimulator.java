@@ -4,8 +4,10 @@
  */
 package de.bitnoise.datasim;
 
-import de.bitnoise.datasim.gui.SimulatorFrame;
-import de.bitnoise.datasim.input.SimulatorInput;
+import de.bitnoise.datasim.controller.DefaultController;
+import de.bitnoise.datasim.controller.SimulatorControllerProvider;
+import de.bitnoise.datasim.generator.SimulatorInput;
+import de.bitnoise.datasim.ui.gui.SimulatorFrame;
 import de.bitnoise.datasim.writer.SimulatorWriter;
 
 public class DataSimulator {

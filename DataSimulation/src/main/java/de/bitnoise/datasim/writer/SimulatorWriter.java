@@ -1,11 +1,12 @@
 package de.bitnoise.datasim.writer;
 
-import de.bitnoise.datasim.input.SimulatorEvent;
+import de.bitnoise.datasim.events.SimulatorEvent;
 
-public interface SimulatorWriter {
+public interface SimulatorWriter
+{
 
-	boolean canHandle(Class<?> type);
+  boolean canHandle(Class<?> type);
 
-	void write(SimulatorEvent event);
-	
+  void write(SimulatorEvent event);
+
 }

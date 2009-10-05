@@ -1,4 +1,4 @@
-package de.bitnoise.datasim;
+package de.bitnoise.datasim.util;
 
 public class UniqeID {
 

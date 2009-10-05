@@ -1,4 +1,4 @@
-package de.bitnoise.datasim.gui.adapter;
+package de.bitnoise.datasim.ui.adapter;
 
 import java.util.Date;
 import java.util.List;
@@ -6,7 +6,7 @@ import java.util.List;
 import javax.swing.table.DefaultTableModel;
 import javax.swing.table.TableColumnModel;
 
-import de.bitnoise.datasim.SimulatorControllerProvider;
+import de.bitnoise.datasim.controller.SimulatorControllerProvider;
 import de.bitnoise.datasim.model.ModelState;
 import de.bitnoise.datasim.model.SimulatorModel;
 import de.bitnoise.datasim.ui.SimulatorModelListener;

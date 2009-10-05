@@ -8,17 +8,17 @@
  *
  * Created on 04.10.2009, 21:44:23
  */
-package de.bitnoise.datasim.gui;
+package de.bitnoise.datasim.ui.gui;
 
 import javax.swing.JTable;
 import javax.swing.table.TableColumn;
 
-import de.bitnoise.datasim.SimulatorControllerProvider;
-import de.bitnoise.datasim.gui.adapter.EventTable;
-import de.bitnoise.datasim.gui.adapter.ModelTable;
+import de.bitnoise.datasim.controller.SimulatorControllerProvider;
 import de.bitnoise.datasim.model.ModelState;
 import de.bitnoise.datasim.model.SimulatorModel;
 import de.bitnoise.datasim.ui.SimulatorModelListener;
+import de.bitnoise.datasim.ui.adapter.EventTable;
+import de.bitnoise.datasim.ui.adapter.ModelTable;
 
 /**
  * 
