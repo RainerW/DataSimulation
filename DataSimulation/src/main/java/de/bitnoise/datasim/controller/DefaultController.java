@@ -5,284 +5,399 @@ import java.util.Comparator;
 import java.util.Date;
 import java.util.EnumMap;
 import java.util.EnumSet;
-import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
-import java.util.Map;
 
+import de.bitnoise.datasim.command.SimulatorCommand;
 import de.bitnoise.datasim.events.SimulatorEvent;
 import de.bitnoise.datasim.events.SimulatorTimedEvent;
-import de.bitnoise.datasim.generator.SimulatorInput;
+import de.bitnoise.datasim.generator.SimulatorGenerator;
 import de.bitnoise.datasim.model.ModelState;
 import de.bitnoise.datasim.model.SimulatorModel;
-import de.bitnoise.datasim.ui.SimulatorEventDetailListener;
+import de.bitnoise.datasim.tracker.SimulatorTracker;
 import de.bitnoise.datasim.ui.SimulatorEventListener;
 import de.bitnoise.datasim.ui.SimulatorModelListener;
 import de.bitnoise.datasim.util.SortedList;
-import de.bitnoise.datasim.writer.SimulatorWriter;
 
 public class DefaultController implements SimulatorControllerProvider,
-		Runnable, SimulatorModelListener, SimulatorEventListener {
+    Runnable, SimulatorModelListener, SimulatorEventListener
+{
 
-	List<SimulatorInput> inputs = new ArrayList<SimulatorInput>();
+  List<SimulatorGenerator> inputs = new ArrayList<SimulatorGenerator>();
 
-	List<SimulatorWriter> writers = new ArrayList<SimulatorWriter>();
+  boolean isRunning = true;
 
-	Map<Class<?>, SimulatorWriter> writerHash = new HashMap<Class<?>, SimulatorWriter>();
+  List<SimulatorEvent> events = new ArrayList<SimulatorEvent>();
 
-	boolean isRunning = true;
+  SortedList<SimulatorTimedEvent> timedEvents = new SortedList<SimulatorTimedEvent>(
+      new TimedEventComparator());
 
-	List<SimulatorEvent> events = new ArrayList<SimulatorEvent>();
-	SortedList<SimulatorTimedEvent> timedEvents = new SortedList<SimulatorTimedEvent>(
-			new TimedEventComparator());
+  List<SimulatorModel> models = new ArrayList<SimulatorModel>();
 
-	List<SimulatorModel> models = new ArrayList<SimulatorModel>();
+  private boolean shutdownRequest = false;
 
-	private boolean shutdownRequest = false;
+  private EnumMap<ModelState, List<SimulatorModel>> modelsByState = new EnumMap<ModelState, List<SimulatorModel>>(
+      ModelState.class);
 
-	private EnumMap<ModelState, List<SimulatorModel>> modelsByState = new EnumMap<ModelState, List<SimulatorModel>>(
-			ModelState.class);
+  public DefaultController()
+  {
+    for (ModelState state : ModelState.values())
+    {
+      modelsByState.put(state, new ArrayList<SimulatorModel>());
+    }
+  }
 
-	public DefaultController() {
-		for (ModelState state : ModelState.values()) {
-			modelsByState.put(state, new ArrayList<SimulatorModel>());
-		}
-	}
+  public boolean addEvent(SimulatorEvent... eventToExecute)
+  {
+    if (eventToExecute == null)
+    {
+      return false;
+    }
+    for (SimulatorEvent event : eventToExecute)
+    {
+      if (event instanceof SimulatorTimedEvent)
+      {
+        timedEvents.add((SimulatorTimedEvent) event);
+      }
+      else
+      {
+        events.add(event);
+      }
+      event.addEventListener(this);
+    }
+    return false;
+  }
 
-	public boolean addEvent(SimulatorEvent... eventToExecute) {
-		if (eventToExecute == null) {
-			return false;
-		}
-		for (SimulatorEvent event : eventToExecute) {
-			if (event instanceof SimulatorTimedEvent) {
-				timedEvents.add((SimulatorTimedEvent) event);
-			} else {
-				events.add(event);
-			}
-			event.addEventListener(this);
-		}
-		return false;
-	}
+  static protected class TimedEventComparator implements
+      Comparator<SimulatorTimedEvent>
+  {
 
-	static protected class TimedEventComparator implements
-			Comparator<SimulatorTimedEvent> {
+    public int compare(SimulatorTimedEvent o1, SimulatorTimedEvent o2)
+    {
+      return o1.getOccuranceTime().compareTo(o2.getOccuranceTime());
+    }
+  }
 
-		public int compare(SimulatorTimedEvent o1, SimulatorTimedEvent o2) {
-			return o1.getOccuranceTime().compareTo(o2.getOccuranceTime());
-		}
-	}
+  public boolean addEvent(List<SimulatorEvent> eventToExceut)
+  {
+    if (eventToExceut == null)
+    {
+      return false;
+    }
+    return addEvent(eventToExceut.toArray(new SimulatorEvent[] {}));
+  }
 
-	public boolean addEvent(List<SimulatorEvent> eventToExceut) {
-		if (eventToExceut == null) {
-			return false;
-		}
-		return addEvent(eventToExceut.toArray(new SimulatorEvent[] {}));
-	}
+  public boolean addModel(SimulatorModel... modelItemToAdd)
+  {
+    if (modelItemToAdd == null)
+    {
+      return false;
+    }
+    dirtyModel = true;
+    for (SimulatorModel model : modelItemToAdd)
+    {
+      models.add(0,model);
+      model.addModelListener(this);
+    }
+    return false;
+  }
 
-	public boolean addModel(SimulatorModel... modelItemToAdd) {
-		if (modelItemToAdd == null) {
-			return false;
-		}
-		for (SimulatorModel model : modelItemToAdd) {
-			models.add(model);
-			model.addModelListener(this);
-		}
-		return false;
-	}
+  public boolean addModel(List<SimulatorModel> modelItemToAdd)
+  {
+    if (modelItemToAdd == null)
+    {
+      return false;
+    }
+    return addModel(modelItemToAdd.toArray(new SimulatorModel[] {}));
+  }
 
-	public boolean addModel(List<SimulatorModel> modelItemToAdd) {
-		if (modelItemToAdd == null) {
-			return false;
-		}
-		return addModel(modelItemToAdd.toArray(new SimulatorModel[] {}));
-	}
+  public void processEvents()
+  {
 
-	public void processEvents() {
+  }
 
-	}
+  public List<SimulatorEvent> getEventsList(Date currentTime)
+  {
+    List<SimulatorEvent> result = new ArrayList<SimulatorEvent>();
+    result = events;
+    events = new ArrayList<SimulatorEvent>();
 
-	public List<SimulatorEvent> getEventsList(Date currentTime) {
-		List<SimulatorEvent> result = new ArrayList<SimulatorEvent>();
-		result = events;
-		events = new ArrayList<SimulatorEvent>();
+    for (Iterator<SimulatorTimedEvent> iter = timedEvents.iterator(); iter
+        .hasNext();)
+    {
+      SimulatorTimedEvent event = iter.next();
+      if (event.getOccuranceTime().before(currentTime))
+      {
+        iter.remove();
+        result.add(event);
+      }
+    }
+    return result;
+  }
 
-		for (Iterator<SimulatorTimedEvent> iter = timedEvents.iterator(); iter
-				.hasNext();) {
-			SimulatorTimedEvent event = iter.next();
-			if (event.getOccuranceTime().before(currentTime)) {
-				iter.remove();
-				result.add(event);
-			}
-		}
-		return result;
-	}
+  public void printState()
+  {
+    int c = 0;
+    for (SimulatorModel model : models)
+    {
+      if (model.getModelState() != ModelState.OK)
+      {
 
-	public void printState() {
-		int c = 0;
-		for (SimulatorModel model : models) {
-			if (model.getModelState() != ModelState.OK) {
+        System.out.println("" + model.getUniqeID() + "\t"
+            + model.getModelState());
+      }
+      else
+      {
+        c++;
+      }
+    }
+    System.out.println("ok = " + c);
 
-				System.out.println("" + model.getUniqeID() + "\t"
-						+ model.getModelState());
-			} else {
-				c++;
-			}
-		}
-		System.out.println("ok = " + c);
+  }
 
-	}
+  public void writeEvents(Date now)
+  {
+    List<SimulatorEvent> events = getEventsList(now);
+    for (SimulatorEvent event : events)
+    {
+      event.execute(this);
+//      SimulatorWriter writer = findWriter(event);
+//      if (event.writeTo(writer))
+//      {
+//        writer.write(event);
+//      }
+    }
+  }
 
-	public void writeEvents(Date now) {
-		List<SimulatorEvent> events = getEventsList(now);
-		for (SimulatorEvent event : events) {
-			SimulatorWriter writer = findWriter(event);
-			if (event.writeTo(writer)) {
-				writer.write(event);
-			}
-		}
-	}
+//  private SimulatorWriter findWriter(SimulatorEvent event)
+//  {
+//    Class<?> type = event.getOutputWriterType();
+//
+//    SimulatorWriter result = writerHash.get(type);
+//    if (result != null)
+//    {
+//      return result;
+//    }
+//
+//    for (SimulatorWriter writer : writers)
+//    {
+//      if (writer.canHandle(type))
+//      {
+//        writerHash.put(type, writer);
+//        return writer;
+//      }
+//    }
+//    throw new IllegalStateException("Unable to find Writer for type : " + type);
+//  }
 
-	private SimulatorWriter findWriter(SimulatorEvent event) {
-		Class<?> type = event.getOutputWriterType();
+  public void createEvents(Date now)
+  {
+    for (SimulatorGenerator input : inputs)
+    {
+      input.createNextEvent(this, now);
+    }
+  }
 
-		SimulatorWriter result = writerHash.get(type);
-		if (result != null) {
-			return result;
-		}
+  public void registerGenerator(SimulatorGenerator intputToRegister)
+  {
+    if (intputToRegister == null)
+    {
+      throw new IllegalArgumentException("intputToRegister cannot be null");
+    }
+    intputToRegister.registerSimulatorController(this);
+    inputs.add(intputToRegister);
+  }
 
-		for (SimulatorWriter writer : writers) {
-			if (writer.canHandle(type)) {
-				writerHash.put(type, writer);
-				return writer;
-			}
-		}
-		throw new IllegalStateException("Unable to find Writer for type : "
-				+ type);
-	}
+  public boolean isRunning()
+  {
+    return isRunning;
+  }
 
-	public void createEvents(Date now) {
-		for (SimulatorInput input : inputs) {
-			input.createNextEvent(this, now);
-		}
-	}
+  public void start(boolean waitUntilStoped)
+  {
+    isRunning = true;
+    shutdownRequest = false;
+    new Thread(this).start();
+    if (waitUntilStoped)
+    {
+      while (isRunning())
+      {
+        sleep(10);
+      }
+    }
+  }
 
-	public void registerInput(SimulatorInput intputToRegister) {
-		if (intputToRegister == null) {
-			throw new IllegalArgumentException(
-					"intputToRegister cannot be null");
-		}
-		intputToRegister.registerSimulatorController(this);
-		inputs.add(intputToRegister);
-	}
+  public void stop()
+  {
+    System.out.println("Shutdown request");
+    shutdownRequest = true;
+  }
 
-	public void registerWriteR(SimulatorWriter writerToRegister) {
-		writers.add(writerToRegister);
-	}
+  public void run()
+  {
+    try
+    {
+      while (isRunning)
+      {
+        Date now = new Date();
+        writeEvents(now);
+        processTrackers(now);
+        if (shutdownRequest)
+        {
+          if (events.size() == 0 && timedEvents.size() == 0)
+          {
+            System.out.println("Shutting down");
+            isRunning = false;
+          }
+        }
+        else
+        {
+          if (!pauseCreation)
+          {
+            createEvents(now);
+          }
+        }
+        notifyEventsChanged();
 
-	public boolean isRunning() {
-		return isRunning;
-	}
+        sleep(1000);
+      }
+    }
+    finally
+    {
+      isRunning = false;
+    }
+  }
 
-	public void start() {
-		isRunning = true;
-		shutdownRequest = false;
-		new Thread(this).start();
-	}
+  private void processTrackers(Date now)
+  {
+    for(SimulatorTracker tracker:trackers) {
+      tracker.processTracker(this, now);
+    }
+  }
 
-	public void stop() {
-		System.out.println("Shutdown request");
-		shutdownRequest = true;
-	}
+  private void sleep(int i)
+  {
+    try
+    {
+      Thread.sleep(i);
+    }
+    catch (InterruptedException e)
+    {
+      throw new RuntimeException(e);
+    }
+  }
 
-	public void run() {
-		try {
-			while (isRunning) {
-				Date now = new Date();
-				processEvents();
-				writeEvents(now);
-				if (shutdownRequest) {
-					if (events.size() == 0 && timedEvents.size() == 0) {
-						System.out.println("Shutting down");
-						isRunning = false;
-					}
-				} else {
-					createEvents(now);
-				}
-				notifyEventsChanged();
-				printState();
+  List<SimulatorEventListener> eventsListeners = new ArrayList<SimulatorEventListener>();
 
-				sleep(1000);
-			}
-		} finally {
-			isRunning = false;
-		}
-	}
+  private List<SimulatorModelListener> modelsListener = new ArrayList<SimulatorModelListener>();
 
-	private void sleep(int i) {
-		try {
-			Thread.sleep(i);
-		} catch (InterruptedException e) {
-			throw new RuntimeException(e);
-		}
-	}
+  private List<SimulatorModel> lastResult;
 
-	List<SimulatorEventListener> eventsListeners = new ArrayList<SimulatorEventListener>();
+  private boolean dirtyModel = true;
 
-	private List<SimulatorModelListener> modelsListener = new ArrayList<SimulatorModelListener>();
+  private ModelState[] lastfilter;
 
-	public void registerEventListener(SimulatorEventListener modelListener) {
-		eventsListeners.add(modelListener);
-	}
+  private boolean pauseCreation=true;
 
-	public void registerModelListener(SimulatorModelListener listener) {
-		modelsListener.add(listener);
-	}
+  private List<SimulatorTracker> trackers=new ArrayList<SimulatorTracker>();
 
-	private void notifyEventsChanged() {
-		for (SimulatorEventListener listener : eventsListeners) {
-			listener.eventSimulatorEventChanged();
-		}
-	}
+  private SimulatorCommand resetCommand;
 
-	private void notifyModelsChanged(SimulatorModel changedModel) {
-		for (SimulatorModelListener listener : modelsListener) {
-			listener.eventSimulatorModelChanged(changedModel);
-		}
+  public void registerEventListener(SimulatorEventListener modelListener)
+  {
+    eventsListeners.add(modelListener);
+  }
 
-	}
+  public void registerModelListener(SimulatorModelListener listener)
+  {
+    modelsListener.add(listener);
+  }
 
-	public List<SimulatorEvent> getEventsList() {
-		List<SimulatorEvent> result = new ArrayList<SimulatorEvent>();
-		result.addAll(events);
-		result.addAll(timedEvents);
-		return result;
-	}
+  private void notifyEventsChanged()
+  {
+    for (SimulatorEventListener listener : eventsListeners)
+    {
+      listener.eventSimulatorEventChanged();
+    }
+  }
 
-	public void eventSimulatorEventChanged() {
-		notifyEventsChanged();
-	}
+  private void notifyModelsChanged(SimulatorModel changedModel)
+  {
+    for (SimulatorModelListener listener : modelsListener)
+    {
+      listener.eventSimulatorModelChanged(changedModel);
+    }
 
-	public void eventSimulatorModelChanged(SimulatorModel changedModel) {
-		notifyModelsChanged(changedModel);
-	}
+  }
 
-	protected List<SimulatorModel> getModelList() {
-		return models;
-	}
+  public List<SimulatorEvent> getEventsList()
+  {
+    List<SimulatorEvent> result = new ArrayList<SimulatorEvent>();
+    result.addAll(events);
+    result.addAll(timedEvents);
+    return result;
+  }
 
-	public List<SimulatorModel> getModelList(ModelState... filter) {
-		if (filter == null || filter.length == 0) {
-			return getModelList();
-		}
-		EnumSet<ModelState> filterSet = EnumSet.of(filter[0], filter);
-		List<SimulatorModel> result = new ArrayList<SimulatorModel>();
-		for (SimulatorModel model : getModelList()) {
-			ModelState state = model.getModelState();
-			if (filterSet.contains(state)) {
-				result.add(model);
-			}
-		}
-		return result;
-	}
+  public void eventSimulatorEventChanged()
+  {
+    notifyEventsChanged();
+  }
+
+  public void eventSimulatorModelChanged(SimulatorModel changedModel)
+  {
+    dirtyModel=true;
+    notifyModelsChanged(changedModel);
+  }
+
+  protected List<SimulatorModel> getModelList()
+  {
+    return models;
+  }
+
+  public List<SimulatorModel> getModelList(ModelState... filter)
+  {
+    if (lastfilter == filter && !dirtyModel)
+    {
+      return lastResult;
+    }
+    if (filter == null || filter.length == 0)
+    {
+      return getModelList();
+    }
+    EnumSet<ModelState> filterSet = EnumSet.of(filter[0], filter);
+    List<SimulatorModel> result = new ArrayList<SimulatorModel>();
+    for (SimulatorModel model : getModelList())
+    {
+      ModelState state = model.getModelState();
+      if (filterSet.contains(state))
+      {
+        result.add(model);
+      }
+    }
+    dirtyModel = false;
+    lastfilter = filter;
+    lastResult = result;
+    return result;
+  }
+
+  public void pause(boolean pause)
+  {
+    pauseCreation = pause;
+  }
+
+  public void registerTracker(SimulatorTracker trackerToRegister)
+  {
+    trackers.add(trackerToRegister);
+  }
+
+  public void executeResetEvent()
+  {
+    resetCommand.execute(this);
+  }
+
+  public void registerCommand(SimulatorCommand command)
+  {
+    resetCommand=command;
+  }
 
 }

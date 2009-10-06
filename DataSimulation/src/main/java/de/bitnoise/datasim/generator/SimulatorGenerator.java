@@ -5,7 +5,7 @@ import java.util.Date;
 import de.bitnoise.datasim.SimulatorPlug;
 import de.bitnoise.datasim.controller.SimulatorController;
 
-public interface SimulatorInput extends SimulatorPlug {
+public interface SimulatorGenerator extends SimulatorPlug {
 
 	void registerSimulatorController(SimulatorController controller);
 

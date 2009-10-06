@@ -5,10 +5,10 @@ import java.util.Random;
 
 import de.bitnoise.datasim.controller.SimulatorController;
 import de.bitnoise.datasim.events.SimulatorEvent;
-import de.bitnoise.datasim.generator.AbstractSimulatorInput;
-import de.bitnoise.datasim.generator.SimulatorInput;
+import de.bitnoise.datasim.generator.AbstractSimulatorGenerator;
+import de.bitnoise.datasim.generator.SimulatorGenerator;
 
-public class BusinesscaseGenerator extends AbstractSimulatorInput implements SimulatorInput {
+public class BusinesscaseGenerator extends AbstractSimulatorGenerator implements SimulatorGenerator {
 
 	Random rnd = new Random();
 	int id = 0;

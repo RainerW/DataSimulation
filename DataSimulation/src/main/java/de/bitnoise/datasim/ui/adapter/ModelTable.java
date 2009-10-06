@@ -50,14 +50,10 @@ public class ModelTable extends DefaultTableModel implements
 
 	@Override
 	public Object getValueAt(int row, int column) {
-		if (myController == null) {
-			return null;
+		SimulatorModel model = getModelAt(row);
+		if(model==null) {
+		  return null;
 		}
-		List<SimulatorModel> models = myController.getModelList(myfilters);
-		if (models.size() <= row) {
-			return null;
-		}
-		SimulatorModel model = models.get(row);
 		switch (column) {
 		case 0:
 			return model.getUniqeID();
@@ -81,5 +77,17 @@ public class ModelTable extends DefaultTableModel implements
 	public void eventSimulatorModelChanged(SimulatorModel changedModel) {
 		fireTableDataChanged();
 	}
+
+  public SimulatorModel getModelAt(int row)
+  {
+    if (myController == null) {
+      return null;
+    }
+    List<SimulatorModel> models = myController.getModelList(myfilters);
+    if (models.size() <= row) {
+      return null;
+    }
+    return models.get(row);
+  }
 
 }

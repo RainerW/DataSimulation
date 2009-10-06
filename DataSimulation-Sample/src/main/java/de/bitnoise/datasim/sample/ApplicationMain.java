@@ -13,9 +13,7 @@ public class ApplicationMain
 
     BusinesscaseGenerator businesscaseGenerator = new BusinesscaseGenerator();
 
-    sim.registerInput(businesscaseGenerator);
-    
-    sim.registerWriter( new DatabaseWriter());
+    sim.registerGenerator(businesscaseGenerator);
     
     sim.runSimulation(true);
   }

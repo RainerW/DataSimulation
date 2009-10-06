@@ -83,7 +83,7 @@ public class EventTable extends DefaultTableModel implements
 		}
 	}
 
-	SimpleDateFormat sdf = new SimpleDateFormat("yyyy.MM.dd hh:mm:ss.SSS");
+	SimpleDateFormat sdf = new SimpleDateFormat("yyyy.MM.dd HH:mm:ss.SSS");
 
 	private String asTime(Date time) {
 		return sdf.format(time);

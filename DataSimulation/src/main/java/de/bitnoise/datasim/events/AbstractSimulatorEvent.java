@@ -1,14 +1,14 @@
 package de.bitnoise.datasim.events;
 
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 
 import de.bitnoise.datasim.model.NoModelDefined;
 import de.bitnoise.datasim.model.SimulatorModel;
 import de.bitnoise.datasim.ui.SimulatorEventListener;
-import de.bitnoise.datasim.writer.SimulatorWriter;
 
-public abstract class AbstractSimulatorEvent implements SimulatorEvent
+public abstract class AbstractSimulatorEvent implements SimulatorTimedEvent
 {
 
   protected List<SimulatorEventListener> eventListeners = new ArrayList<SimulatorEventListener>();
@@ -17,7 +17,9 @@ public abstract class AbstractSimulatorEvent implements SimulatorEvent
 
   protected String fDetails;
 
-  public AbstractSimulatorEvent(SimulatorModel model, String details)
+  private Date fOccuranceTime;
+
+  public AbstractSimulatorEvent(SimulatorModel model, String details,Date occurance)
   {
     if (model != null)
     {
@@ -27,6 +29,7 @@ public abstract class AbstractSimulatorEvent implements SimulatorEvent
     {
       fDetails = details;
     }
+    fOccuranceTime = occurance;
   }
 
   public void addEventListener(SimulatorEventListener listener)
@@ -48,14 +51,9 @@ public abstract class AbstractSimulatorEvent implements SimulatorEvent
   {
     return trackingModel;
   }
-
-  public boolean writeTo(SimulatorWriter writer)
-  {
-    return true;
-  }
   
-  public Class<?> getOutputWriterType()
+  public Date getOccuranceTime()
   {
-    return getClass();
+    return fOccuranceTime;
   }
 }

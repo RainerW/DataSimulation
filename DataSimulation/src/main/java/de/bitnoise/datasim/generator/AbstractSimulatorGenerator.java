@@ -4,7 +4,7 @@ import java.util.Date;
 
 import de.bitnoise.datasim.controller.SimulatorController;
 
-public abstract class AbstractSimulatorInput implements SimulatorInput
+public abstract class AbstractSimulatorGenerator implements SimulatorGenerator
 {
 
   protected SimulatorController fController;

@@ -4,11 +4,14 @@
  */
 package de.bitnoise.datasim;
 
+import javax.swing.plaf.SliderUI;
+
+import de.bitnoise.datasim.command.SimulatorCommand;
 import de.bitnoise.datasim.controller.DefaultController;
 import de.bitnoise.datasim.controller.SimulatorControllerProvider;
-import de.bitnoise.datasim.generator.SimulatorInput;
+import de.bitnoise.datasim.generator.SimulatorGenerator;
+import de.bitnoise.datasim.tracker.SimulatorTracker;
 import de.bitnoise.datasim.ui.gui.SimulatorFrame;
-import de.bitnoise.datasim.writer.SimulatorWriter;
 
 public class DataSimulator {
 
@@ -20,22 +23,24 @@ public class DataSimulator {
 			frame = new SimulatorFrame();
 			frame.showMainFrame(controller);
 		}
-		controller.start();
-		while (controller.isRunning()) {
-
-		}
+		controller.start(gui);
 	}
 
 	public void stop() {
 		controller.stop();
 	}
 
-	public void registerInput(SimulatorInput intputToRegister) {
-		controller.registerInput(intputToRegister);
+	public void registerGenerator(SimulatorGenerator generatorToRegister) {
+		controller.registerGenerator(generatorToRegister);
 	}
 
-	public void registerWriter(SimulatorWriter writerToRegister) {
-		controller.registerWriteR(writerToRegister);
+	public void registerTracker(SimulatorTracker trackerToRegister) {
+	  controller.registerTracker(trackerToRegister);
 	}
+
+  public void registerCommand(SimulatorCommand cleanDatabaseCommand)
+  {
+    controller.registerCommand(cleanDatabaseCommand);
+  }
 
 }
