@@ -36,6 +36,11 @@ public abstract class AbstractSimulatorEvent implements SimulatorTimedEvent
   {
     eventListeners.add(listener);
   }
+  
+  public void removeEventListener(SimulatorEventListener listener)
+  {
+    eventListeners.remove(listener);
+  }
 
   public String getDetails()
   {

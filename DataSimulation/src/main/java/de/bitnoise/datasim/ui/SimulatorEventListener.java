@@ -1,5 +1,8 @@
 package de.bitnoise.datasim.ui;
 
-public interface SimulatorEventListener {
-	void eventSimulatorEventChanged();
+import de.bitnoise.datasim.events.SimulatorEvent;
+
+public interface SimulatorEventListener
+{
+  void eventSimulatorEventChanged();
 }

@@ -1,5 +1,6 @@
 package de.bitnoise.datasim.controller;
 
+import java.io.File;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.Date;
@@ -17,6 +18,7 @@ import de.bitnoise.datasim.model.SimulatorModel;
 import de.bitnoise.datasim.tracker.SimulatorTracker;
 import de.bitnoise.datasim.ui.SimulatorEventListener;
 import de.bitnoise.datasim.ui.SimulatorModelListener;
+import de.bitnoise.datasim.util.MemoryDumper;
 import de.bitnoise.datasim.util.SortedList;
 
 public class DefaultController implements SimulatorControllerProvider,
@@ -29,15 +31,17 @@ public class DefaultController implements SimulatorControllerProvider,
 
   List<SimulatorEvent> events = new ArrayList<SimulatorEvent>();
 
-  SortedList<SimulatorTimedEvent> timedEvents = new SortedList<SimulatorTimedEvent>(
-      new TimedEventComparator());
+  SortedList<SimulatorTimedEvent> timedEvents =
+      new SortedList<SimulatorTimedEvent>(new TimedEventComparator());
 
   List<SimulatorModel> models = new ArrayList<SimulatorModel>();
 
   private boolean shutdownRequest = false;
 
-  private EnumMap<ModelState, List<SimulatorModel>> modelsByState = new EnumMap<ModelState, List<SimulatorModel>>(
-      ModelState.class);
+  private EnumMap<ModelState, List<SimulatorModel>> modelsByState =
+      new EnumMap<ModelState, List<SimulatorModel>>(ModelState.class);
+
+  private int sleeptime = 1000;
 
   public DefaultController()
   {
@@ -94,10 +98,13 @@ public class DefaultController implements SimulatorControllerProvider,
       return false;
     }
     dirtyModel = true;
-    for (SimulatorModel model : modelItemToAdd)
+    synchronized (models)
     {
-      models.add(0,model);
-      model.addModelListener(this);
+      for (SimulatorModel model : modelItemToAdd)
+      {
+        models.add(0, model);
+        model.addModelListener(this);
+      }
     }
     return false;
   }
@@ -160,35 +167,35 @@ public class DefaultController implements SimulatorControllerProvider,
     List<SimulatorEvent> events = getEventsList(now);
     for (SimulatorEvent event : events)
     {
-      event.execute(this);
-//      SimulatorWriter writer = findWriter(event);
-//      if (event.writeTo(writer))
-//      {
-//        writer.write(event);
-//      }
+      if (event.execute(this))
+      {
+        event.removeEventListener(this);
+      }
     }
   }
 
-//  private SimulatorWriter findWriter(SimulatorEvent event)
-//  {
-//    Class<?> type = event.getOutputWriterType();
-//
-//    SimulatorWriter result = writerHash.get(type);
-//    if (result != null)
-//    {
-//      return result;
-//    }
-//
-//    for (SimulatorWriter writer : writers)
-//    {
-//      if (writer.canHandle(type))
-//      {
-//        writerHash.put(type, writer);
-//        return writer;
-//      }
-//    }
-//    throw new IllegalStateException("Unable to find Writer for type : " + type);
-//  }
+  // private SimulatorWriter findWriter(SimulatorEvent event)
+  // {
+  // Class<?> type = event.getOutputWriterType();
+  //
+  // SimulatorWriter result = writerHash.get(type);
+  // if (result != null)
+  // {
+  // return result;
+  // }
+  //
+  // for (SimulatorWriter writer : writers)
+  // {
+  // if (writer.canHandle(type))
+  // {
+  // writerHash.put(type, writer);
+  // return writer;
+  // }
+  // }
+  // throw new
+  // IllegalStateException("Unable to find Writer for type : " +
+  // type);
+  // }
 
   public void createEvents(Date now)
   {
@@ -237,6 +244,7 @@ public class DefaultController implements SimulatorControllerProvider,
   {
     try
     {
+      MemoryDumper md = new MemoryDumper("d:\\var\\memory.txt", 120);
       while (isRunning)
       {
         Date now = new Date();
@@ -259,7 +267,8 @@ public class DefaultController implements SimulatorControllerProvider,
         }
         notifyEventsChanged();
 
-        sleep(1000);
+        sleep(sleeptime);
+        md.dump();
       }
     }
     finally
@@ -270,7 +279,8 @@ public class DefaultController implements SimulatorControllerProvider,
 
   private void processTrackers(Date now)
   {
-    for(SimulatorTracker tracker:trackers) {
+    for (SimulatorTracker tracker : trackers)
+    {
       tracker.processTracker(this, now);
     }
   }
@@ -287,9 +297,11 @@ public class DefaultController implements SimulatorControllerProvider,
     }
   }
 
-  List<SimulatorEventListener> eventsListeners = new ArrayList<SimulatorEventListener>();
+  List<SimulatorEventListener> eventsListeners =
+      new ArrayList<SimulatorEventListener>();
 
-  private List<SimulatorModelListener> modelsListener = new ArrayList<SimulatorModelListener>();
+  private List<SimulatorModelListener> modelsListener =
+      new ArrayList<SimulatorModelListener>();
 
   private List<SimulatorModel> lastResult;
 
@@ -297,9 +309,9 @@ public class DefaultController implements SimulatorControllerProvider,
 
   private ModelState[] lastfilter;
 
-  private boolean pauseCreation=true;
+  private boolean pauseCreation = true;
 
-  private List<SimulatorTracker> trackers=new ArrayList<SimulatorTracker>();
+  private List<SimulatorTracker> trackers = new ArrayList<SimulatorTracker>();
 
   private SimulatorCommand resetCommand;
 
@@ -345,13 +357,24 @@ public class DefaultController implements SimulatorControllerProvider,
 
   public void eventSimulatorModelChanged(SimulatorModel changedModel)
   {
-    dirtyModel=true;
+    dirtyModel = true;
     notifyModelsChanged(changedModel);
+    synchronized (models)
+    {
+      if (changedModel.getModelState() == ModelState.OK)
+      {
+        changedModel.removeListener(this);
+        models.remove(changedModel);
+      }
+    }
   }
 
   protected List<SimulatorModel> getModelList()
   {
-    return models;
+    synchronized (models)
+    {
+      return models;
+    }
   }
 
   public List<SimulatorModel> getModelList(ModelState... filter)
@@ -366,12 +389,15 @@ public class DefaultController implements SimulatorControllerProvider,
     }
     EnumSet<ModelState> filterSet = EnumSet.of(filter[0], filter);
     List<SimulatorModel> result = new ArrayList<SimulatorModel>();
-    for (SimulatorModel model : getModelList())
+    synchronized (models)
     {
-      ModelState state = model.getModelState();
-      if (filterSet.contains(state))
+      for (SimulatorModel model : getModelList())
       {
-        result.add(model);
+        ModelState state = model.getModelState();
+        if (filterSet.contains(state))
+        {
+          result.add(model);
+        }
       }
     }
     dirtyModel = false;
@@ -397,7 +423,20 @@ public class DefaultController implements SimulatorControllerProvider,
 
   public void registerCommand(SimulatorCommand command)
   {
-    resetCommand=command;
+    resetCommand = command;
+  }
+
+  public void setEventsPerSecond(int value)
+  {
+    sleeptime = transformTicksPerMinuteToSleepTime(value);
+    // System.out.println("value = " + value + " sleeptime=" +
+    // sleeptime);
+  }
+
+  protected int transformTicksPerMinuteToSleepTime(int value)
+  {
+    int oneMinute = 1000 * 60;
+    return oneMinute / value;
   }
 
 }

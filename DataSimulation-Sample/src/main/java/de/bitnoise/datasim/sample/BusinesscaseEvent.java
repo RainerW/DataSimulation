@@ -32,10 +32,11 @@ public class BusinesscaseEvent extends AbstractSimulatorEvent implements
     return ++uniqueID;
   }
 
-  public void execute(SimulatorController controller)
+  public boolean execute(SimulatorController controller)
   {
     new DatabaseWriter().write(this);
     myBC.written(this);
+    return true;
   }
 
   public String getType()

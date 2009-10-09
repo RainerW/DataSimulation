@@ -49,7 +49,10 @@ public class AbstractSimulatorModel implements SimulatorModel
 
   protected void notifyModelChange(SimulatorModel changedModel)
   {
-    for (SimulatorModelListener listener : modelListener)
+    ArrayList<SimulatorModelListener> temp =
+        new ArrayList<SimulatorModelListener>();
+    temp.addAll(modelListener);
+    for (SimulatorModelListener listener : temp)
     {
       listener.eventSimulatorModelChanged(changedModel);
     }

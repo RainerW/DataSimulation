@@ -49,4 +49,6 @@ public interface SimulatorControllerProvider extends SimulatorController {
 
   void executeResetEvent();
 
+  void setEventsPerSecond(int value);
+
 }

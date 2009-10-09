@@ -12,79 +12,94 @@ import de.bitnoise.datasim.model.SimulatorModel;
 import de.bitnoise.datasim.ui.SimulatorModelListener;
 
 public class ModelTable extends DefaultTableModel implements
-		SimulatorModelListener {
+    SimulatorModelListener
+{
 
-	private SimulatorControllerProvider myController;
-	private ModelState[] myfilters;
+  private SimulatorControllerProvider myController;
 
-	public ModelTable(SimulatorControllerProvider controller,
-			ModelState... stateFilters) {
-		myController = controller;
-		myController.registerModelListener(this);
-		myfilters = stateFilters;
-	}
+  private ModelState[] myfilters;
 
-	@Override
-	public int getColumnCount() {
-		return 3;
-	}
+  public ModelTable(SimulatorControllerProvider controller,
+      ModelState... stateFilters)
+  {
+    myController = controller;
+    myController.registerModelListener(this);
+    myfilters = stateFilters;
+  }
 
-	public void setTableWidth(TableColumnModel columnModel) {
-		columnModel.getColumn(0).setMaxWidth(160);
-		columnModel.getColumn(0).setPreferredWidth(160);
-	}
+  @Override
+  public int getColumnCount()
+  {
+    return 3;
+  }
 
-	@Override
-	public String getColumnName(int column) {
-		switch (column) {
-		case 0:
-			return "Model-Id";
-		case 1:
-			return "State";
-		case 2:
-			return "Details";
-		default:
-			return "-";
-		}
-	}
+  public void setTableWidth(TableColumnModel columnModel)
+  {
+    columnModel.getColumn(0).setMaxWidth(160);
+    columnModel.getColumn(0).setPreferredWidth(160);
+  }
 
-	@Override
-	public Object getValueAt(int row, int column) {
-		SimulatorModel model = getModelAt(row);
-		if(model==null) {
-		  return null;
-		}
-		switch (column) {
-		case 0:
-			return model.getUniqeID();
-		case 1:
-			return model.getModelState();
-		case 2:
-			return model.getDetails();
-		default:
-			return null;
-		}
-	}
+  @Override
+  public String getColumnName(int column)
+  {
+    switch (column)
+    {
+    case 0:
+      return "Model-Id";
+    case 1:
+      return "State";
+    case 2:
+      return "Details";
+    default:
+      return "-";
+    }
+  }
 
-	@Override
-	public int getRowCount() {
-		if (myController == null) {
-			return super.getRowCount();
-		}
-		return myController.getModelList(myfilters).size();
-	}
+  @Override
+  public Object getValueAt(int row, int column)
+  {
+    SimulatorModel model = getModelAt(row);
+    if (model == null)
+    {
+      return null;
+    }
+    switch (column)
+    {
+    case 0:
+      return model.getUniqeID();
+    case 1:
+      return model.getModelState();
+    case 2:
+      return model.getDetails();
+    default:
+      return null;
+    }
+  }
 
-	public void eventSimulatorModelChanged(SimulatorModel changedModel) {
-		fireTableDataChanged();
-	}
+  @Override
+  public int getRowCount()
+  {
+    if (myController == null)
+    {
+      return super.getRowCount();
+    }
+    return myController.getModelList(myfilters).size();
+  }
+
+  public void eventSimulatorModelChanged(SimulatorModel changedModel)
+  {
+    fireTableDataChanged();
+  }
 
   public SimulatorModel getModelAt(int row)
   {
-    if (myController == null) {
+    if (myController == null)
+    {
       return null;
     }
     List<SimulatorModel> models = myController.getModelList(myfilters);
-    if (models.size() <= row) {
+    if (models.size() <= row)
+    {
       return null;
     }
     return models.get(row);

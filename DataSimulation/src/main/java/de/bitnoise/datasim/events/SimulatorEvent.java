@@ -14,6 +14,8 @@ public interface SimulatorEvent {
 	String getDetails();
 
 	void addEventListener(SimulatorEventListener listener);
+	
+	void removeEventListener(SimulatorEventListener listener);
 
-  void execute(SimulatorController controller);
+  boolean execute(SimulatorController controller);
 }
